@@ -8,29 +8,96 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&family=Orbitron:wght@400;700;900&display=swap');
-        :root { --primary: #00f2ff; --danger: #ff0055; --bg: #020408; --panel-bg: rgba(4, 8, 15, 0.95); }
-        body { background: var(--bg); color: var(--primary); margin: 0; overflow: hidden; font-family: 'Fira Code', monospace; text-transform: uppercase; background-image: radial-gradient(circle at 50% 50%, #0a1428 0%, #020408 100%); }
+        :root { --primary: #00f2ff; --danger: #ff0055; --bg: #020408; --panel-bg: rgba(4, 8, 15, 0.98); }
+        
+        body { 
+            background: var(--bg); 
+            color: var(--primary); 
+            margin: 0; 
+            overflow: hidden; 
+            font-family: 'Fira Code', monospace; 
+            text-transform: uppercase; 
+            background-image: radial-gradient(circle at 50% 50%, #0a1428 0%, #020408 100%); 
+        }
+
         .orbitron { font-family: 'Orbitron', sans-serif; }
+        
+        /* Scrollbar Styling */
+        #oracle-response-box::-webkit-scrollbar, .custom-scroll::-webkit-scrollbar { width: 4px; }
+        #oracle-response-box::-webkit-scrollbar-track, .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 242, 255, 0.05); }
+        #oracle-response-box::-webkit-scrollbar-thumb, .custom-scroll::-webkit-scrollbar-thumb { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+
         .map-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        
         .country { fill: #0d1a2d; stroke: rgba(0, 242, 255, 0.15); stroke-width: 0.6; transition: all 0.3s ease; cursor: crosshair; }
         .country:hover { fill: #1e3a5f; stroke: var(--primary); }
         .country.active { fill: rgba(0, 242, 255, 0.25); stroke: var(--primary); stroke-width: 1.5; filter: drop-shadow(0 0 10px var(--primary)); }
+        
         .terminal-border { border: 1px solid rgba(0, 242, 255, 0.3); background: rgba(0, 10, 20, 0.8); backdrop-filter: blur(8px); }
-        #info-panel { background: var(--panel-bg); transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1); transform: translateX(100%); border-left: 2px solid var(--primary); z-index: 100; position: fixed; right: 0; top: 0; height: 100%; width: 600px; }
+        
+        #info-panel { 
+            background: var(--panel-bg); 
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1); 
+            transform: translateX(100%); 
+            border-left: 2px solid var(--primary); 
+            z-index: 100; 
+            position: fixed; 
+            right: 0; 
+            top: 0; 
+            height: 100%; 
+            width: 600px; 
+            box-shadow: -20px 0 50px rgba(0,0,0,0.5);
+        }
         #info-panel.visible { transform: translateX(0); }
-        .stat-card { border-left: 2px solid var(--primary); background: rgba(255,255,255,0.05); padding: 12px; margin-bottom: 8px; }
+        
+        .stat-card { border-left: 2px solid var(--primary); background: rgba(255,255,255,0.03); padding: 12px; margin-bottom: 8px; position: relative; overflow: hidden; }
+        .stat-card::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 242, 255, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02)); background-size: 100% 2px, 3px 100%; pointer-events: none; }
+
         .signal-item { border-left: 1px solid var(--primary); padding-left: 8px; margin-bottom: 4px; animation: fadeIn 0.5s ease; }
+        
+        .ai-msg { color: #fff; text-shadow: 0 0 8px rgba(0, 242, 255, 0.5); }
+        .user-cmd { color: rgba(0, 242, 255, 0.4); font-size: 10px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px; }
+
+        /* Rapport Analytique Style */
+        .analytic-folder {
+            background: rgba(0, 242, 255, 0.02);
+            border: 1px solid rgba(0, 242, 255, 0.1);
+            padding: 20px;
+            position: relative;
+        }
+        .analytic-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--primary);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        .stamp {
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            padding: 2px 8px;
+            font-weight: 900;
+            transform: rotate(-5deg);
+            opacity: 0.8;
+            font-size: 10px;
+        }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes typing { from { width: 0 } to { width: 100% } }
     </style>
 </head>
 <body>
+    <!-- LOADER -->
     <div id="loader" class="fixed inset-0 bg-black z-[1000] flex flex-col items-center justify-center">
         <div class="orbitron text-4xl font-black mb-8 text-cyan-500 animate-pulse">OVERLORD_V11</div>
         <div class="w-96 h-[2px] bg-gray-900"><div id="loader-bar" class="h-full bg-cyan-400 w-0 transition-all duration-500"></div></div>
     </div>
 
+    <!-- MAP -->
     <div id="map" class="map-container"></div>
 
+    <!-- HUD -->
     <div class="fixed inset-0 pointer-events-none z-50 p-8 flex flex-col justify-between">
         <div class="flex justify-between items-start">
             <div class="terminal-border p-6 pointer-events-auto">
@@ -39,39 +106,62 @@
             </div>
             <div id="clock" class="terminal-border p-4 orbitron text-2xl font-bold pointer-events-auto">00:00:00</div>
         </div>
+        
         <div class="pointer-events-auto">
             <div class="terminal-border p-4 w-[450px] h-40 flex flex-col">
-                <div class="text-[9px] font-bold border-b border-white/10 pb-1 mb-2">FLUX_ACTUALITE_MONDIAL (GDELT)</div>
+                <div class="text-[9px] font-bold border-b border-white/10 pb-1 mb-2 tracking-widest">FLUX_ACTUALITE_MONDIAL (GDELT)</div>
                 <div id="log-feed" class="flex-1 overflow-hidden text-[9px] space-y-2 italic opacity-70">
-                    <div class="animate-pulse">SYNCHRONISATION DU FLUX...</div>
+                    <div class="animate-pulse text-cyan-900 text-xs">RECHERCHE_SIGNALS_SATELLITE...</div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- SIDE PANEL -->
     <div id="info-panel" class="flex flex-col">
-        <div class="p-12 flex-1 overflow-y-auto">
-            <div class="flex justify-between items-start mb-12">
-                <h2 id="country-name" class="orbitron text-5xl font-black text-white italic">--</h2>
-                <button onclick="hidePanel()" class="text-2xl hover:text-white transition-colors">✕</button>
+        <div class="p-10 flex-1 overflow-y-auto custom-scroll">
+            <div class="flex justify-between items-start mb-10">
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-cyan-500 mb-1 tracking-[0.4em]">TARGET_COORDINATES</span>
+                    <h2 id="country-name" class="orbitron text-5xl font-black text-white italic tracking-tighter uppercase">--</h2>
+                </div>
+                <button onclick="hidePanel()" class="text-2xl hover:text-white transition-colors opacity-40 hover:opacity-100">✕</button>
             </div>
-            <div id="stats-grid" class="grid grid-cols-2 gap-4 mb-8">
-                <!-- Les cartes de stats seront injectées ici -->
-            </div>
-            <div class="report-section mb-8">
-                <div class="text-xs font-bold text-cyan-500 mb-2">RAPPORT_ANALYTIQUE</div>
-                <div id="report-text" class="text-sm leading-relaxed text-gray-400 border-t border-white/10 pt-4">
-                    SÉLECTIONNEZ UNE ZONE D'INTÉRÊT SUR LA CARTE...
+
+            <div id="stats-grid" class="grid grid-cols-2 gap-4 mb-10"></div>
+
+            <div class="analytic-folder">
+                <div class="analytic-header">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-cyan-500"></div>
+                        <span class="text-[10px] font-bold tracking-widest">DOSSIER_STRATÉGIQUE</span>
+                    </div>
+                    <div class="stamp orbitron">CLASSIFIED</div>
+                </div>
+                <div id="report-text" class="text-xs leading-relaxed text-gray-300 font-mono tracking-tight italic">
+                    <span class="opacity-30">VEUILLEZ SÉLECTIONNER UNE ZONE D'OPÉRATION...</span>
+                </div>
+                <div class="mt-6 flex justify-between items-center opacity-20 text-[8px]">
+                    <span>REF_ID: 99-XPL-B1</span>
+                    <span>SOURCE: OVERLORD_SYSTEMS</span>
                 </div>
             </div>
         </div>
-        <div class="p-8 border-t border-white/10 bg-black/40">
-            <div id="oracle-response-box" class="h-40 overflow-y-auto mb-4 text-[12px] italic text-cyan-100 scroll-smooth">
-                S.Y.B.I.L PRÊTE POUR SYNTHÈSE.
+
+        <!-- ORACLE INTERFACE -->
+        <div class="p-8 border-t border-cyan-500/20 bg-black/60 backdrop-blur-xl">
+            <div class="flex items-center gap-2 mb-3">
+                <div class="w-1.5 h-1.5 bg-cyan-500 animate-ping"></div>
+                <span class="text-[10px] font-bold tracking-[0.3em]">SYNTHÈSE_NEURONALE_SYBIL</span>
             </div>
+            
+            <div id="oracle-response-box" class="h-44 overflow-y-auto mb-4 p-4 bg-black/40 border border-white/5 text-[12px] italic scroll-smooth leading-relaxed">
+                <div class="ai-msg">INITIALISATION DU NOYAU S.Y.B.I.L... PRÊT.</div>
+            </div>
+
             <div class="relative flex items-center">
-                <span class="absolute left-4 text-cyan-500 font-bold">CMD></span>
-                <input type="text" id="oracle-input" placeholder="ANALYSE_PARAMÈTRES..." class="w-full pl-14 p-4 bg-white/5 border border-white/10 focus:border-cyan-500 outline-none text-[12px] orbitron" onkeypress="handleOracleKey(event)">
+                <span class="absolute left-4 text-cyan-500 font-bold text-xs">CMD></span>
+                <input type="text" id="oracle-input" autocomplete="off" placeholder="TRANSMETTRE_INSTRUCTIONS..." class="w-full pl-14 p-4 bg-cyan-500/5 border border-cyan-500/20 focus:border-cyan-500 focus:bg-cyan-500/10 outline-none text-[11px] orbitron transition-all" onkeypress="handleOracleKey(event)">
             </div>
         </div>
     </div>
@@ -99,7 +189,7 @@
                     feed.innerHTML = data.articles.map(a => `<div class="signal-item">>> ${a.title.toUpperCase()}</div>`).join('');
                 }
             } catch (e) {
-                feed.innerHTML = `<div class="text-red-500">ÉCHEC_LIAISON_SATELLITE</div>`;
+                feed.innerHTML = `<div class="text-red-500 text-[8px]">CONNECTION_LOST // RECONNECTING...</div>`;
             }
         }
 
@@ -121,7 +211,8 @@
             d3.select(el).classed("active", true);
             document.getElementById('info-panel').classList.add('visible');
             document.getElementById('country-name').innerText = name;
-            document.getElementById('stats-grid').innerHTML = '<div class="col-span-2 animate-pulse text-xs">ACQUISITION_DONNÉES...</div>';
+            document.getElementById('stats-grid').innerHTML = '<div class="col-span-2 animate-pulse text-[10px] tracking-widest text-cyan-900 italic">DECRYPTING_TARGET_DATA...</div>';
+            document.getElementById('report-text').innerHTML = '<span class="opacity-30">READING_DOSSIER...</span>';
 
             try {
                 const res = await fetch('/api', {
@@ -131,28 +222,27 @@
                 });
                 const data = await res.json();
                 
-                // Injection dynamique des cartes de stats
                 document.getElementById('stats-grid').innerHTML = `
                     <div class="stat-card">
-                        <div class="text-[8px] opacity-50">PUISSANCE_PROJETÉE</div>
+                        <div class="text-[8px] text-cyan-500 mb-1 tracking-tighter">PROJECTED_POWER_INDEX</div>
                         <div class="text-xl font-black orbitron">${data.stats?.power || '--'}%</div>
                     </div>
                     <div class="stat-card">
-                        <div class="text-[8px] opacity-50">NIVEAU_MENACE</div>
+                        <div class="text-[8px] text-cyan-500 mb-1 tracking-tighter">GLOBAL_THREAT_LVL</div>
                         <div class="text-xl font-black orbitron text-red-500">${data.stats?.threat || '--'}%</div>
                     </div>
                     <div class="stat-card">
-                        <div class="text-[8px] opacity-50">INDICE_DOMINO</div>
+                        <div class="text-[8px] text-cyan-500 mb-1 tracking-tighter">DOMINO_EFFECT_RISK</div>
                         <div class="text-xl font-black orbitron text-yellow-500">${data.stats?.domino || '--'}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="text-[8px] opacity-50">CODE_ISO</div>
+                        <div class="text-[8px] text-cyan-500 mb-1 tracking-tighter">ISO_IDENTIFIER</div>
                         <div class="text-xl font-black orbitron">${data.code || '??'}</div>
                     </div>
                 `;
                 document.getElementById('report-text').innerText = data.analysis;
             } catch (err) {
-                document.getElementById('report-text').innerText = "ERREUR_LIAISON_API_INDEX";
+                document.getElementById('report-text').innerText = "FATAL_ERROR: LIAISON_INTERROMPUE.";
             }
         }
 
@@ -161,8 +251,8 @@
                 const prompt = e.target.value;
                 if (!prompt) return;
                 const box = document.getElementById('oracle-response-box');
-                box.innerHTML += `<div class="text-white/30 mb-1">>> ${prompt}</div>`;
-                box.innerHTML += `<div id="ai-typing" class="text-cyan-400 animate-pulse mb-4">CALCUL_S_Y_B_I_L...</div>`;
+                box.innerHTML += `<div class="user-cmd">>> ${prompt}</div>`;
+                box.innerHTML += `<div id="ai-typing" class="text-cyan-400 animate-pulse my-2 text-[10px]">ANALYSING_QUERY...</div>`;
                 box.scrollTop = box.scrollHeight;
                 
                 try {
@@ -172,12 +262,12 @@
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                     });
                     const data = await res.json();
-                    document.getElementById('ai-typing').remove();
-                    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "UNITÉ_NON_RÉPONSIVE.";
-                    box.innerHTML += `<div class="mb-4 text-white leading-tight">${reply}</div>`;
+                    if(document.getElementById('ai-typing')) document.getElementById('ai-typing').remove();
+                    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "NO_OUTPUT_DETECTED.";
+                    box.innerHTML += `<div class="ai-msg mb-4">${reply}</div>`;
                 } catch (err) {
                     if(document.getElementById('ai-typing')) document.getElementById('ai-typing').remove();
-                    box.innerHTML += `<div class="mb-4 text-red-500">ERREUR_SYBIL_OFFLINE</div>`;
+                    box.innerHTML += `<div class="mb-4 text-red-500">CORE_OFFLINE.</div>`;
                 }
                 box.scrollTop = box.scrollHeight;
                 e.target.value = '';
