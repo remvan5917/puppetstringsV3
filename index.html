@@ -85,6 +85,18 @@
             margin-right: 6px;
         }
 
+        .legal-footer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            text-align: right;
+            font-size: 8px;
+            color: rgba(0, 242, 255, 0.4);
+            letter-spacing: 0.1em;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
@@ -96,6 +108,7 @@
 
     <div id="map" class="map-container"></div>
 
+    <!-- HUD PRINCIPAL -->
     <div class="fixed inset-0 pointer-events-none z-50 p-10 flex flex-col justify-between">
         <div class="flex justify-between items-start">
             <div class="terminal-border p-8 pointer-events-auto">
@@ -118,6 +131,7 @@
         </div>
     </div>
 
+    <!-- PANNEAU D'ANALYSE -->
     <div id="info-panel" class="flex flex-col">
         <div class="p-12 flex-1 overflow-y-auto custom-scroll">
             <div class="flex justify-between items-start mb-12">
@@ -128,8 +142,10 @@
                 <button onclick="hidePanel()" class="text-xl hover:text-white transition-colors opacity-30 hover:opacity-100 p-2">✕</button>
             </div>
 
+            <!-- GRILLE DE DONNÉES -->
             <div id="stats-grid" class="grid grid-cols-2 gap-4 mb-10"></div>
 
+            <!-- RAPPORT TACTIQUE STRUCTURE -->
             <div class="tactical-report">
                 <div class="report-header">
                     <div class="report-label uppercase">Synthesis_Briefing</div>
@@ -152,6 +168,7 @@
             </div>
         </div>
 
+        <!-- CONSOLE S.Y.B.I.L -->
         <div class="p-8 border-t border-white/10 bg-black/40 backdrop-blur-md">
             <div class="flex items-center justify-between mb-4 px-1">
                 <div class="flex items-center gap-3">
@@ -170,6 +187,13 @@
                 <input type="text" id="oracle-input" autocomplete="off" placeholder="INPUT COMMAND..." class="w-full pl-12 p-4 bg-white/5 border border-white/10 focus:border-cyan-500 focus:bg-white/10 outline-none text-[11px] font-mono transition-all" onkeypress="handleOracleKey(event)">
             </div>
         </div>
+    </div>
+
+    <!-- MENTION LEGALE (VANCOPPENOLLE RÉMY) -->
+    <div class="legal-footer">
+        <div>ALL RIGHTS RESERVED // STRATEGIC ACCESS ONLY</div>
+        <div class="font-bold">VANCOPPENOLLE RÉMY // 2024-2026 ©</div>
+        <div class="opacity-40">INTELLECTUAL PROPERTY PROTECTED BY OVERLORD CRYPTO-PROTOCOLS</div>
     </div>
 
     <script>
@@ -211,7 +235,6 @@
             d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson").then(topo => {
                 g.selectAll("path").data(topo.features).enter().append("path").attr("d", path).attr("class", "country")
                 .on("click", (e, d) => {
-                    // Normalisation des noms pour l'IA (Correction pour USA)
                     let countryName = d.properties.name;
                     if (countryName === "United States of America") countryName = "USA";
                     analyzeCountry(countryName, e.target);
@@ -237,10 +260,9 @@
                 });
                 const data = await res.json();
                 
-                // Vérification si les données sont bien présentes
-                const power = data.stats?.power || '85'; // Fallback intelligent
-                const threat = data.stats?.threat || '12';
-                const domino = data.stats?.domino || '1.4';
+                const power = data.stats?.power || (Math.floor(Math.random() * 40) + 50);
+                const threat = data.stats?.threat || (Math.floor(Math.random() * 30) + 5);
+                const domino = data.stats?.domino || (Math.random() * 2).toFixed(1);
                 const code = data.code || (name === "USA" ? "US" : "UKN");
 
                 document.getElementById('stats-grid').innerHTML = `
