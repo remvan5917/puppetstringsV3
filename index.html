@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUPPET STRINGS | STRATEGIC OVERLORD v11.5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&family=Orbitron:wght@400;700;900&display=swap');
+        :root { --primary: #00f2ff; --danger: #ff0055; --bg: #020408; --panel-bg: rgba(4, 8, 15, 0.95); }
+        body { background: var(--bg); color: var(--primary); margin: 0; overflow: hidden; font-family: 'Fira Code', monospace; text-transform: uppercase; background-image: radial-gradient(circle at 50% 50%, #0a1428 0%, #020408 100%); }
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+        .map-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .country { fill: #0d1a2d; stroke: rgba(0, 242, 255, 0.15); stroke-width: 0.6; transition: all 0.3s ease; cursor: crosshair; }
+        .country:hover { fill: #1e3a5f; stroke: var(--primary); }
+        .country.active { fill: rgba(0, 242, 255, 0.25); stroke: var(--primary); stroke-width: 1.5; filter: drop-shadow(0 0 10px var(--primary)); }
+        .terminal-border { border: 1px solid rgba(0, 242, 255, 0.3); background: rgba(0, 10, 20, 0.8); backdrop-filter: blur(8px); }
+        #info-panel { background: var(--panel-bg); transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1); transform: translateX(100%); border-left: 2px solid var(--primary); z-index: 100; position: fixed; right: 0; top: 0; h-full; w-[600px]; }
+        #info-panel.visible { transform: translateX(0); }
+        .stat-card { border-left: 2px solid var(--primary); background: rgba(255,255,255,0.05); padding: 12px; }
+    </style>
+</head>
+<body>
+    <div id="loader" class="fixed inset-0 bg-black z-[1000] flex flex-col items-center justify-center">
+        <div class="orbitron text-4xl font-black mb-8 text-cyan-500 animate-pulse">OVERLORD_V11</div>
+        <div class="w-96 h-[2px] bg-gray-900"><div id="loader-bar" class="h-full bg-cyan-400 w-0 transition-all duration-500"></div></div>
+    </div>
+
+    <div id="map" class="map-container"></div>
+
+    <div class="fixed inset-0 pointer-events-none z-50 p-8 flex flex-col justify-between">
+        <div class="flex justify-between items-start">
+            <div class="terminal-border p-6 pointer-events-auto">
+                <h1 class="orbitron text-3xl font-black italic tracking-tighter">STRATEGIC_OVERLORD</h1>
+                <div class="text-[8px] mt-2 text-cyan-400">CORE_ONLINE // SECURE_PROXY</div>
+            </div>
+            <div id="clock" class="terminal-border p-4 orbitron text-2xl font-bold pointer-events-auto">00:00:00</div>
+        </div>
+        <div id="log-feed" class="terminal-border p-4 w-[450px] h-32 overflow-hidden text-[9px] pointer-events-auto italic opacity-70"></div>
+    </div>
+
+    <div id="info-panel" class="h-full flex flex-col">
+        <div class="p-12 flex-1 overflow-y-auto">
+            <div class="flex justify-between items-start mb-12">
+                <h2 id="country-name" class="orbitron text-5xl font-black text-white italic">--</h2>
+                <button onclick="hidePanel()" class="text-2xl">✕</button>
+            </div>
+            <div id="stats-grid" class="grid grid-cols-2 gap-4 mb-8"></div>
+            <div id="report-text" class="text-sm leading-relaxed text-gray-400 border-t border-white/10 pt-4"></div>
+        </div>
+        <div class="p-8 border-t border-white/10 bg-black/40">
+            <div id="oracle-response-box" class="h-40 overflow-y-auto mb-4 text-[12px] italic text-cyan-100"></div>
+            <input type="text" id="oracle-input" placeholder="CMD> ANALYSE_TARGET..." class="w-full p-4 bg-white/5 border border-white/10 focus:border-cyan-500 outline-none" onkeypress="handleOracleKey(event)">
+        </div>
+    </div>
+
+    <script>
+        let svg, g, projection, path;
+        
+        async function init() {
+            const bar = document.getElementById('loader-bar');
+            bar.style.width = "50%";
+            initMap();
+            bar.style.width = "100%";
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+            setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
+        }
+
+        function initMap() {
+            const w = window.innerWidth, h = window.innerHeight;
+            svg = d3.select("#map").append("svg").attr("width", w).attr("height", h);
+            g = svg.append("g");
+            projection = d3.geoMercator().scale(w / 6).translate([w / 2.5, h / 1.5]);
+            path = d3.geoPath().projection(projection);
+            d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson").then(topo => {
+                g.selectAll("path").data(topo.features).enter().append("path").attr("d", path).attr("class", "country")
+                .on("click", (e, d) => analyzeCountry(d.properties.name, e.target));
+            });
+        }
+
+        async function analyzeCountry(name, el) {
+            d3.selectAll(".country").classed("active", false);
+            d3.select(el).classed("active", true);
+            document.getElementById('info-panel').classList.add('visible');
+            document.getElementById('country-name').innerText = name;
+
+            const res = await fetch('/api', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ country: name })
+            });
+            const data = await res.json();
+            document.getElementById('report-text').innerText = data.analysis;
+        }
+
+        async function handleOracleKey(e) {
+            if (e.key === 'Enter') {
+                const prompt = e.target.value;
+                const box = document.getElementById('oracle-response-box');
+                box.innerHTML += `<div class="opacity-40">>> ${prompt}</div>`;
+                const res = await fetch('/api/sybil', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await res.json();
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "ERROR";
+                box.innerHTML += `<div class="mb-4 text-white">${reply}</div>`;
+                box.scrollTop = box.scrollHeight;
+                e.target.value = '';
+            }
+        }
+
+        function hidePanel() { document.getElementById('info-panel').classList.remove('visible'); }
+        window.onload = init;
+    </script>
+</body>
+</html>
