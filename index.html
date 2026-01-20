@@ -22,7 +22,7 @@
 
         .orbitron { font-family: 'Orbitron', sans-serif; }
         
-        /* Scrollbar Styling */
+        /* Personnalisation de la barre de défilement */
         #oracle-response-box::-webkit-scrollbar, .custom-scroll::-webkit-scrollbar { width: 4px; }
         #oracle-response-box::-webkit-scrollbar-track, .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 242, 255, 0.05); }
         #oracle-response-box::-webkit-scrollbar-thumb, .custom-scroll::-webkit-scrollbar-thumb { background: var(--primary); }
@@ -87,14 +87,17 @@
 
         .legal-footer {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            text-align: right;
-            font-size: 8px;
-            color: rgba(0, 242, 255, 0.4);
-            letter-spacing: 0.1em;
-            z-index: 1000;
+            bottom: 30px;
+            left: 30px;
+            text-align: left;
+            font-size: 9px;
+            color: rgba(0, 242, 255, 0.5);
+            letter-spacing: 0.15em;
+            z-index: 60;
             pointer-events: none;
+            line-height: 1.6;
+            border-left: 1px solid rgba(0, 242, 255, 0.2);
+            padding-left: 15px;
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
@@ -113,19 +116,19 @@
         <div class="flex justify-between items-start">
             <div class="terminal-border p-8 pointer-events-auto">
                 <h1 class="orbitron text-2xl font-black tracking-[0.2em]">OVERLORD_V11.5</h1>
-                <div class="text-[9px] mt-1 text-cyan-400 opacity-50 font-bold">SECURE NETWORK // NODAL ACCESS</div>
+                <div class="text-[9px] mt-1 text-cyan-400 opacity-50 font-bold">RÉSEAU SÉCURISÉ // ACCÈS NODAL</div>
             </div>
             <div id="clock" class="terminal-border p-5 orbitron text-xl font-medium pointer-events-auto tabular-nums">00:00:00</div>
         </div>
         
-        <div class="pointer-events-auto">
+        <div class="pointer-events-auto flex items-end justify-between">
             <div class="terminal-border p-6 w-[500px] h-48 flex flex-col">
                 <div class="text-[10px] font-bold border-b border-white/10 pb-2 mb-3 tracking-widest flex justify-between">
-                    <span>GLOBAL_SITUATIONAL_AWARENESS</span>
-                    <span class="text-cyan-500 italic">LIVE_FEED</span>
+                    <span>CONSCIENCE_SITUATIONNELLE_GLOBALE</span>
+                    <span class="text-cyan-500 italic">FLUX_DIRECT</span>
                 </div>
                 <div id="log-feed" class="flex-1 overflow-hidden text-[10px] space-y-3 italic opacity-80">
-                    <div class="animate-pulse">WAITING FOR SATELLITE HANDSHAKE...</div>
+                    <div class="animate-pulse">ATTENTE SYNCHRONISATION SATELLITE...</div>
                 </div>
             </div>
         </div>
@@ -136,7 +139,7 @@
         <div class="p-12 flex-1 overflow-y-auto custom-scroll">
             <div class="flex justify-between items-start mb-12">
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-cyan-500 mb-2 tracking-[0.5em] font-bold opacity-60">GEOPOLITICAL_VECTOR</span>
+                    <span class="text-[10px] text-cyan-500 mb-2 tracking-[0.5em] font-bold opacity-60">VECTEUR_GÉOPOLITIQUE</span>
                     <h2 id="country-name" class="orbitron text-5xl font-black text-white tracking-tighter uppercase">--</h2>
                 </div>
                 <button onclick="hidePanel()" class="text-xl hover:text-white transition-colors opacity-30 hover:opacity-100 p-2">✕</button>
@@ -148,21 +151,21 @@
             <!-- RAPPORT TACTIQUE STRUCTURE -->
             <div class="tactical-report">
                 <div class="report-header">
-                    <div class="report-label uppercase">Synthesis_Briefing</div>
-                    <div class="text-[9px] font-mono opacity-40">INSTID: 882-STRAT</div>
+                    <div class="report-label uppercase">SYNTHÈSE DU BRIEFING</div>
+                    <div class="text-[9px] font-mono opacity-40">ID_INST : 882-STRAT</div>
                 </div>
                 
                 <div id="report-text" class="text-[13px] leading-relaxed text-gray-400 font-mono tracking-tight">
                     <div class="flex items-center gap-3">
                         <div class="status-dot animate-pulse"></div>
-                        <span class="opacity-40">SYSTEM READY. SELECT TARGET ON GRID.</span>
+                        <span class="opacity-40">SYSTÈME PRÊT. SÉLECTIONNEZ UNE CIBLE SUR LA GRILLE.</span>
                     </div>
                 </div>
 
                 <div class="mt-8 pt-6 border-t border-white/5 flex justify-between items-center opacity-30 text-[9px] font-mono">
                     <div class="flex gap-4">
-                        <span>DATA_STABILITY: 98.4%</span>
-                        <span>LINK_STRENGHT: OPTIMAL</span>
+                        <span>STABILITÉ_DONNÉES : 98.4%</span>
+                        <span>FORCE_LIAISON : OPTIMALE</span>
                     </div>
                 </div>
             </div>
@@ -173,27 +176,27 @@
             <div class="flex items-center justify-between mb-4 px-1">
                 <div class="flex items-center gap-3">
                     <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full shadow-[0_0_8px_var(--primary)]"></div>
-                    <span class="text-[10px] font-bold tracking-[0.4em] text-cyan-500">S.Y.B.I.L_NODE</span>
+                    <span class="text-[10px] font-bold tracking-[0.4em] text-cyan-500">NOEUD_S.Y.B.I.L</span>
                 </div>
-                <span class="text-[9px] font-mono opacity-30">ENCRYPTED_COMMS</span>
+                <span class="text-[9px] font-mono opacity-30">COMMS_CHIFFRÉES</span>
             </div>
             
             <div id="oracle-response-box" class="h-40 overflow-y-auto mb-5 p-5 bg-black/60 border border-white/5 text-[12px] scroll-smooth font-mono">
-                <div class="ai-msg italic opacity-50">S.Y.B.I.L. ONLINE. WAITING FOR DIRECTIVE...</div>
+                <div class="ai-msg italic opacity-50">S.Y.B.I.L. EN LIGNE. EN ATTENTE DE DIRECTIVES...</div>
             </div>
 
             <div class="relative flex items-center">
                 <span class="absolute left-5 text-cyan-500 font-bold text-xs opacity-50">></span>
-                <input type="text" id="oracle-input" autocomplete="off" placeholder="INPUT COMMAND..." class="w-full pl-12 p-4 bg-white/5 border border-white/10 focus:border-cyan-500 focus:bg-white/10 outline-none text-[11px] font-mono transition-all" onkeypress="handleOracleKey(event)">
+                <input type="text" id="oracle-input" autocomplete="off" placeholder="ENTRER COMMANDE..." class="w-full pl-12 p-4 bg-white/5 border border-white/10 focus:border-cyan-500 focus:bg-white/10 outline-none text-[11px] font-mono transition-all" onkeypress="handleOracleKey(event)">
             </div>
         </div>
     </div>
 
-    <!-- MENTION LEGALE (VANCOPPENOLLE RÉMY) -->
+    <!-- MENTION LEGALE (SIGNATURE) -->
     <div class="legal-footer">
-        <div>ALL RIGHTS RESERVED // STRATEGIC ACCESS ONLY</div>
-        <div class="font-bold">VANCOPPENOLLE RÉMY // 2024-2026 ©</div>
-        <div class="opacity-40">INTELLECTUAL PROPERTY PROTECTED BY OVERLORD CRYPTO-PROTOCOLS</div>
+        <div class="font-bold text-white tracking-[0.3em] mb-1">VANCOPPENOLLE RÉMY // 2024-2026 ©</div>
+        <div class="text-[7px] opacity-70">CLASSIFIED DATA // ALL RIGHTS RESERVED</div>
+        <div class="text-[7px] opacity-30 mt-1 uppercase">Propriété intellectuelle protégée par protocoles Overlord</div>
     </div>
 
     <script>
@@ -222,7 +225,7 @@
                     feed.innerHTML = data.articles.map(a => `<div class="signal-item"> ${a.title.toUpperCase()}</div>`).join('');
                 }
             } catch (e) {
-                feed.innerHTML = `<div class="text-red-900 text-[10px] font-bold tracking-widest">SIGNAL_ERROR // RETRYING_HANDSHAKE...</div>`;
+                feed.innerHTML = `<div class="text-red-900 text-[10px] font-bold tracking-widest">ERREUR_SIGNAL // NOUVELLE TENTATIVE...</div>`;
             }
         }
 
@@ -249,8 +252,8 @@
             document.getElementById('info-panel').classList.add('visible');
             document.getElementById('country-name').innerText = name;
             
-            document.getElementById('stats-grid').innerHTML = '<div class="col-span-2 text-[10px] tracking-[0.2em] opacity-30 italic">INITIALIZING_QUERY...</div>';
-            document.getElementById('report-text').innerHTML = '<div class="flex items-center gap-3"><div class="status-dot animate-ping"></div><span class="opacity-30">PULLING STRATEGIC ASSETS...</span></div>';
+            document.getElementById('stats-grid').innerHTML = '<div class="col-span-2 text-[10px] tracking-[0.2em] opacity-30 italic">INITIALISATION_REQUÊTE...</div>';
+            document.getElementById('report-text').innerHTML = '<div class="flex items-center gap-3"><div class="status-dot animate-ping"></div><span class="opacity-30">RÉCUPÉRATION DES ACTIFS STRATÉGIQUES...</span></div>';
 
             try {
                 const res = await fetch('/api', {
@@ -267,25 +270,25 @@
 
                 document.getElementById('stats-grid').innerHTML = `
                     <div class="stat-card">
-                        <div class="text-[9px] text-cyan-500/60 mb-2 font-bold">POWER_PROJECTION</div>
+                        <div class="text-[9px] text-cyan-500/60 mb-2 font-bold">PROJECTION_PUISSANCE</div>
                         <div class="text-2xl font-black orbitron tabular-nums">${power}%</div>
                     </div>
                     <div class="stat-card">
-                        <div class="text-[9px] text-cyan-500/60 mb-2 font-bold">THREAT_LEVEL</div>
+                        <div class="text-[9px] text-cyan-500/60 mb-2 font-bold">NIVEAU_MENACE</div>
                         <div class="text-2xl font-black orbitron tabular-nums text-red-500">${threat}%</div>
                     </div>
                     <div class="stat-card">
-                        <div class="text-[9px] text-cyan-500/60 mb-2 font-bold">DOMINO_RISK</div>
+                        <div class="text-[9px] text-cyan-500/60 mb-2 font-bold">RISQUE_DOMINO</div>
                         <div class="text-2xl font-black orbitron tabular-nums text-yellow-500">${domino}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="text-[9px] text-cyan-500/60 mb-2 font-bold">REGION_CODE</div>
+                        <div class="text-[9px] text-cyan-500/60 mb-2 font-bold">CODE_RÉGION</div>
                         <div class="text-2xl font-black orbitron">${code}</div>
                     </div>
                 `;
-                document.getElementById('report-text').innerHTML = `<span>${data.analysis || "DATA_STREAM_CORRUPTED"}</span>`;
+                document.getElementById('report-text').innerHTML = `<span>${data.analysis || "FLUX_DONNÉES_CORROMPU"}</span>`;
             } catch (err) {
-                document.getElementById('report-text').innerHTML = "<span class='text-red-500'>CRITICAL: CONNECTION TIMEOUT.</span>";
+                document.getElementById('report-text').innerHTML = "<span class='text-red-500'>CRITIQUE : DÉLAI DE CONNEXION DÉPASSÉ.</span>";
             }
         }
 
@@ -295,7 +298,7 @@
                 if (!prompt) return;
                 const box = document.getElementById('oracle-response-box');
                 box.innerHTML += `<div class="user-cmd">> ${prompt}</div>`;
-                box.innerHTML += `<div id="ai-typing" class="text-cyan-500/40 my-2 text-[10px] font-bold">PROCESSING...</div>`;
+                box.innerHTML += `<div id="ai-typing" class="text-cyan-500/40 my-2 text-[10px] font-bold">TRAITEMENT...</div>`;
                 box.scrollTop = box.scrollHeight;
                 
                 try {
@@ -306,11 +309,11 @@
                     });
                     const data = await res.json();
                     if(document.getElementById('ai-typing')) document.getElementById('ai-typing').remove();
-                    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "NO_RESPONSE.";
+                    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "AUCUNE_RÉPONSE.";
                     box.innerHTML += `<div class="ai-msg">${reply}</div>`;
                 } catch (err) {
                     if(document.getElementById('ai-typing')) document.getElementById('ai-typing').remove();
-                    box.innerHTML += `<div class="text-red-900 font-bold">LINK_FAILURE.</div>`;
+                    box.innerHTML += `<div class="text-red-900 font-bold">ÉCHEC_LIAISON.</div>`;
                 }
                 box.scrollTop = box.scrollHeight;
                 e.target.value = '';
