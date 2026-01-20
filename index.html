@@ -16,9 +16,11 @@
         .country:hover { fill: #1e3a5f; stroke: var(--primary); }
         .country.active { fill: rgba(0, 242, 255, 0.25); stroke: var(--primary); stroke-width: 1.5; filter: drop-shadow(0 0 10px var(--primary)); }
         .terminal-border { border: 1px solid rgba(0, 242, 255, 0.3); background: rgba(0, 10, 20, 0.8); backdrop-filter: blur(8px); }
-        #info-panel { background: var(--panel-bg); transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1); transform: translateX(100%); border-left: 2px solid var(--primary); z-index: 100; position: fixed; right: 0; top: 0; h-full; w-[600px]; }
+        #info-panel { background: var(--panel-bg); transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1); transform: translateX(100%); border-left: 2px solid var(--primary); z-index: 100; position: fixed; right: 0; top: 0; height: 100%; width: 600px; }
         #info-panel.visible { transform: translateX(0); }
-        .stat-card { border-left: 2px solid var(--primary); background: rgba(255,255,255,0.05); padding: 12px; }
+        .stat-card { border-left: 2px solid var(--primary); background: rgba(255,255,255,0.05); padding: 12px; margin-bottom: 8px; }
+        .signal-item { border-left: 1px solid var(--primary); padding-left: 8px; margin-bottom: 4px; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
@@ -37,21 +39,40 @@
             </div>
             <div id="clock" class="terminal-border p-4 orbitron text-2xl font-bold pointer-events-auto">00:00:00</div>
         </div>
-        <div id="log-feed" class="terminal-border p-4 w-[450px] h-32 overflow-hidden text-[9px] pointer-events-auto italic opacity-70"></div>
+        <div class="pointer-events-auto">
+            <div class="terminal-border p-4 w-[450px] h-40 flex flex-col">
+                <div class="text-[9px] font-bold border-b border-white/10 pb-1 mb-2">FLUX_ACTUALITE_MONDIAL (GDELT)</div>
+                <div id="log-feed" class="flex-1 overflow-hidden text-[9px] space-y-2 italic opacity-70">
+                    <div class="animate-pulse">SYNCHRONISATION DU FLUX...</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="info-panel" class="h-full flex flex-col">
+    <div id="info-panel" class="flex flex-col">
         <div class="p-12 flex-1 overflow-y-auto">
             <div class="flex justify-between items-start mb-12">
                 <h2 id="country-name" class="orbitron text-5xl font-black text-white italic">--</h2>
-                <button onclick="hidePanel()" class="text-2xl">✕</button>
+                <button onclick="hidePanel()" class="text-2xl hover:text-white transition-colors">✕</button>
             </div>
-            <div id="stats-grid" class="grid grid-cols-2 gap-4 mb-8"></div>
-            <div id="report-text" class="text-sm leading-relaxed text-gray-400 border-t border-white/10 pt-4"></div>
+            <div id="stats-grid" class="grid grid-cols-2 gap-4 mb-8">
+                <!-- Les cartes de stats seront injectées ici -->
+            </div>
+            <div class="report-section mb-8">
+                <div class="text-xs font-bold text-cyan-500 mb-2">RAPPORT_ANALYTIQUE</div>
+                <div id="report-text" class="text-sm leading-relaxed text-gray-400 border-t border-white/10 pt-4">
+                    SÉLECTIONNEZ UNE ZONE D'INTÉRÊT SUR LA CARTE...
+                </div>
+            </div>
         </div>
         <div class="p-8 border-t border-white/10 bg-black/40">
-            <div id="oracle-response-box" class="h-40 overflow-y-auto mb-4 text-[12px] italic text-cyan-100"></div>
-            <input type="text" id="oracle-input" placeholder="CMD> ANALYSE_TARGET..." class="w-full p-4 bg-white/5 border border-white/10 focus:border-cyan-500 outline-none" onkeypress="handleOracleKey(event)">
+            <div id="oracle-response-box" class="h-40 overflow-y-auto mb-4 text-[12px] italic text-cyan-100 scroll-smooth">
+                S.Y.B.I.L PRÊTE POUR SYNTHÈSE.
+            </div>
+            <div class="relative flex items-center">
+                <span class="absolute left-4 text-cyan-500 font-bold">CMD></span>
+                <input type="text" id="oracle-input" placeholder="ANALYSE_PARAMÈTRES..." class="w-full pl-14 p-4 bg-white/5 border border-white/10 focus:border-cyan-500 outline-none text-[12px] orbitron" onkeypress="handleOracleKey(event)">
+            </div>
         </div>
     </div>
 
@@ -62,21 +83,37 @@
             const bar = document.getElementById('loader-bar');
             bar.style.width = "50%";
             initMap();
+            fetchGDELT();
+            setInterval(fetchGDELT, 60000);
             bar.style.width = "100%";
             setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
-            setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
+            setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString('fr-FR'), 1000);
+        }
+
+        async function fetchGDELT() {
+            const feed = document.getElementById('log-feed');
+            try {
+                const res = await fetch(`https://api.gdeltproject.org/api/v2/doc/doc?query=(conflict OR economy OR threat)&mode=artlist&format=json&maxrecords=6`);
+                const data = await res.json();
+                if (data.articles) {
+                    feed.innerHTML = data.articles.map(a => `<div class="signal-item">>> ${a.title.toUpperCase()}</div>`).join('');
+                }
+            } catch (e) {
+                feed.innerHTML = `<div class="text-red-500">ÉCHEC_LIAISON_SATELLITE</div>`;
+            }
         }
 
         function initMap() {
             const w = window.innerWidth, h = window.innerHeight;
             svg = d3.select("#map").append("svg").attr("width", w).attr("height", h);
             g = svg.append("g");
-            projection = d3.geoMercator().scale(w / 6).translate([w / 2.5, h / 1.5]);
+            projection = d3.geoMercator().scale(w / 6.5).translate([w / 2.5, h / 1.5]);
             path = d3.geoPath().projection(projection);
             d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson").then(topo => {
                 g.selectAll("path").data(topo.features).enter().append("path").attr("d", path).attr("class", "country")
                 .on("click", (e, d) => analyzeCountry(d.properties.name, e.target));
             });
+            svg.call(d3.zoom().scaleExtent([1, 15]).on("zoom", (ev) => g.attr("transform", ev.transform)));
         }
 
         async function analyzeCountry(name, el) {
@@ -84,29 +121,64 @@
             d3.select(el).classed("active", true);
             document.getElementById('info-panel').classList.add('visible');
             document.getElementById('country-name').innerText = name;
+            document.getElementById('stats-grid').innerHTML = '<div class="col-span-2 animate-pulse text-xs">ACQUISITION_DONNÉES...</div>';
 
-            const res = await fetch('/api', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ country: name })
-            });
-            const data = await res.json();
-            document.getElementById('report-text').innerText = data.analysis;
+            try {
+                const res = await fetch('/api', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ country: name })
+                });
+                const data = await res.json();
+                
+                // Injection dynamique des cartes de stats
+                document.getElementById('stats-grid').innerHTML = `
+                    <div class="stat-card">
+                        <div class="text-[8px] opacity-50">PUISSANCE_PROJETÉE</div>
+                        <div class="text-xl font-black orbitron">${data.stats?.power || '--'}%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-[8px] opacity-50">NIVEAU_MENACE</div>
+                        <div class="text-xl font-black orbitron text-red-500">${data.stats?.threat || '--'}%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-[8px] opacity-50">INDICE_DOMINO</div>
+                        <div class="text-xl font-black orbitron text-yellow-500">${data.stats?.domino || '--'}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-[8px] opacity-50">CODE_ISO</div>
+                        <div class="text-xl font-black orbitron">${data.code || '??'}</div>
+                    </div>
+                `;
+                document.getElementById('report-text').innerText = data.analysis;
+            } catch (err) {
+                document.getElementById('report-text').innerText = "ERREUR_LIAISON_API_INDEX";
+            }
         }
 
         async function handleOracleKey(e) {
             if (e.key === 'Enter') {
                 const prompt = e.target.value;
+                if (!prompt) return;
                 const box = document.getElementById('oracle-response-box');
-                box.innerHTML += `<div class="opacity-40">>> ${prompt}</div>`;
-                const res = await fetch('/api/sybil', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-                const data = await res.json();
-                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "ERROR";
-                box.innerHTML += `<div class="mb-4 text-white">${reply}</div>`;
+                box.innerHTML += `<div class="text-white/30 mb-1">>> ${prompt}</div>`;
+                box.innerHTML += `<div id="ai-typing" class="text-cyan-400 animate-pulse mb-4">CALCUL_S_Y_B_I_L...</div>`;
+                box.scrollTop = box.scrollHeight;
+                
+                try {
+                    const res = await fetch('/api/sybil', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    const data = await res.json();
+                    document.getElementById('ai-typing').remove();
+                    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "UNITÉ_NON_RÉPONSIVE.";
+                    box.innerHTML += `<div class="mb-4 text-white leading-tight">${reply}</div>`;
+                } catch (err) {
+                    if(document.getElementById('ai-typing')) document.getElementById('ai-typing').remove();
+                    box.innerHTML += `<div class="mb-4 text-red-500">ERREUR_SYBIL_OFFLINE</div>`;
+                }
                 box.scrollTop = box.scrollHeight;
                 e.target.value = '';
             }
