@@ -85,19 +85,19 @@
             margin-right: 6px;
         }
 
+        /* Repositionné pour éviter le chevauchement avec le log-feed */
         .legal-footer {
             position: fixed;
-            bottom: 30px;
-            left: 30px;
-            text-align: left;
-            font-size: 9px;
-            color: rgba(0, 242, 255, 0.5);
-            letter-spacing: 0.15em;
-            z-index: 60;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 8px;
+            color: rgba(0, 242, 255, 0.4);
+            letter-spacing: 0.2em;
+            z-index: 40;
             pointer-events: none;
-            line-height: 1.6;
-            border-left: 1px solid rgba(0, 242, 255, 0.2);
-            padding-left: 15px;
+            width: 100%;
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
@@ -194,9 +194,8 @@
 
     <!-- MENTION LEGALE (SIGNATURE) -->
     <div class="legal-footer">
-        <div class="font-bold text-white tracking-[0.3em] mb-1">VANCOPPENOLLE RÉMY // 2024-2026 ©</div>
-        <div class="text-[7px] opacity-70">CLASSIFIED DATA // ALL RIGHTS RESERVED</div>
-        <div class="text-[7px] opacity-30 mt-1 uppercase">Propriété intellectuelle protégée par protocoles Overlord</div>
+        <span class="font-bold text-white tracking-[0.4em]">VANCOPPENOLLE RÉMY // 2024-2026 ©</span>
+        <span class="opacity-30 ml-4">PROTOCOLE OVERLORD : TOUS DROITS RÉSERVÉS</span>
     </div>
 
     <script>
