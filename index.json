@@ -1,0 +1,69 @@
+{
+"system_version": "7.2.1",
+"codename": "GOLD_RESERVE_UPDATE",
+"data_sources": {
+"gold": "World Gold Council (WGC)",
+"url": "https://www.gold.org/goldhub/data/gold-reserves-by-country"
+},
+"settings": {
+"default_zoom": 1,
+"theme": "dark",
+"alert_level": "VOLATILE",
+"refresh_rate_ms": 1000,
+"currency_focus": ["USD", "EUR", "CNY", "GOLD"]
+},
+"financial_indicators": {
+"inflation_risk": {
+"low": "Épargne protégée, stabilité des prix.",
+"moderate": "Érosion lente du pouvoir d'achat. Diversification conseillée.",
+"high": "Danger monétaire. Risque de dévaluation majeure."
+}
+},
+"custom_country_data": {
+"FRA": {
+"strategic_notes": "Pivot européen, capacité de projection nucléaire.",
+"finance": {
+"debt_gdp": "110%",
+"rating": "AA",
+"gold_reserves": "2437 tonnes",
+"citizen_advice": "Privilégier les actifs tangibles. Réserves d'or solides, un gage de sécurité pour l'euro."
+}
+},
+"USA": {
+"strategic_notes": "Hégémonie monétaire. Le dollar repose sur la confiance et l'or.",
+"finance": {
+"debt_gdp": "120%",
+"rating": "AA+",
+"gold_reserves": "8133 tonnes",
+"citizen_advice": "Plus grosses réserves mondiales. Protection contre l'effondrement systémique."
+}
+},
+"CHN": {
+"strategic_notes": "Expansion économique. Accumulation agressive d'or.",
+"finance": {
+"debt_gdp": "77%",
+"rating": "A+",
+"gold_reserves": "2264 tonnes",
+"citizen_advice": "La Chine achète massivement pour dé-dollariser. Suivre la tendance."
+}
+},
+"CHE": {
+"strategic_notes": "Coffre-fort mondial.",
+"finance": {
+"debt_gdp": "40%",
+"rating": "AAA",
+"gold_reserves": "1040 tonnes",
+"citizen_advice": "Ratio or/population le plus élevé. Stabilité maximale."
+}
+},
+"DEU": {
+"strategic_notes": "Moteur industriel européen.",
+"finance": {
+"debt_gdp": "66%",
+"rating": "AAA",
+"gold_reserves": "3352 tonnes",
+"citizen_advice": "Deuxième détenteur mondial. Pilier de la résilience européenne."
+}
+}
+}
+}
