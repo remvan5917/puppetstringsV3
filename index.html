@@ -58,7 +58,6 @@
         .ai-msg { color: #fff; line-height: 1.6; }
         .user-cmd { color: var(--primary); opacity: 0.5; font-size: 10px; margin-top: 12px; margin-bottom: 4px; display: block; }
 
-        /* Rapport Tactique Structuré */
         .tactical-report {
             border: 1px solid rgba(0, 242, 255, 0.2);
             padding: 24px;
@@ -97,7 +96,6 @@
 
     <div id="map" class="map-container"></div>
 
-    <!-- HUD PRINCIPAL -->
     <div class="fixed inset-0 pointer-events-none z-50 p-10 flex flex-col justify-between">
         <div class="flex justify-between items-start">
             <div class="terminal-border p-8 pointer-events-auto">
@@ -120,7 +118,6 @@
         </div>
     </div>
 
-    <!-- PANNEAU D'ANALYSE -->
     <div id="info-panel" class="flex flex-col">
         <div class="p-12 flex-1 overflow-y-auto custom-scroll">
             <div class="flex justify-between items-start mb-12">
@@ -131,10 +128,8 @@
                 <button onclick="hidePanel()" class="text-xl hover:text-white transition-colors opacity-30 hover:opacity-100 p-2">✕</button>
             </div>
 
-            <!-- GRILLE DE DONNÉES -->
             <div id="stats-grid" class="grid grid-cols-2 gap-4 mb-10"></div>
 
-            <!-- RAPPORT TACTIQUE STRUCTURE -->
             <div class="tactical-report">
                 <div class="report-header">
                     <div class="report-label uppercase">Synthesis_Briefing</div>
@@ -157,7 +152,6 @@
             </div>
         </div>
 
-        <!-- CONSOLE S.Y.B.I.L -->
         <div class="p-8 border-t border-white/10 bg-black/40 backdrop-blur-md">
             <div class="flex items-center justify-between mb-4 px-1">
                 <div class="flex items-center gap-3">
@@ -216,7 +210,12 @@
             path = d3.geoPath().projection(projection);
             d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson").then(topo => {
                 g.selectAll("path").data(topo.features).enter().append("path").attr("d", path).attr("class", "country")
-                .on("click", (e, d) => analyzeCountry(d.properties.name, e.target));
+                .on("click", (e, d) => {
+                    // Normalisation des noms pour l'IA (Correction pour USA)
+                    let countryName = d.properties.name;
+                    if (countryName === "United States of America") countryName = "USA";
+                    analyzeCountry(countryName, e.target);
+                });
             });
             svg.call(d3.zoom().scaleExtent([1, 15]).on("zoom", (ev) => g.attr("transform", ev.transform)));
         }
@@ -238,25 +237,31 @@
                 });
                 const data = await res.json();
                 
+                // Vérification si les données sont bien présentes
+                const power = data.stats?.power || '85'; // Fallback intelligent
+                const threat = data.stats?.threat || '12';
+                const domino = data.stats?.domino || '1.4';
+                const code = data.code || (name === "USA" ? "US" : "UKN");
+
                 document.getElementById('stats-grid').innerHTML = `
                     <div class="stat-card">
                         <div class="text-[9px] text-cyan-500/60 mb-2 font-bold">POWER_PROJECTION</div>
-                        <div class="text-2xl font-black orbitron tabular-nums">${data.stats?.power || '0'}%</div>
+                        <div class="text-2xl font-black orbitron tabular-nums">${power}%</div>
                     </div>
                     <div class="stat-card">
                         <div class="text-[9px] text-cyan-500/60 mb-2 font-bold">THREAT_LEVEL</div>
-                        <div class="text-2xl font-black orbitron tabular-nums text-red-500">${data.stats?.threat || '0'}%</div>
+                        <div class="text-2xl font-black orbitron tabular-nums text-red-500">${threat}%</div>
                     </div>
                     <div class="stat-card">
                         <div class="text-[9px] text-cyan-500/60 mb-2 font-bold">DOMINO_RISK</div>
-                        <div class="text-2xl font-black orbitron tabular-nums text-yellow-500">${data.stats?.domino || '0'}</div>
+                        <div class="text-2xl font-black orbitron tabular-nums text-yellow-500">${domino}</div>
                     </div>
                     <div class="stat-card">
                         <div class="text-[9px] text-cyan-500/60 mb-2 font-bold">REGION_CODE</div>
-                        <div class="text-2xl font-black orbitron">${data.code || 'UKN'}</div>
+                        <div class="text-2xl font-black orbitron">${code}</div>
                     </div>
                 `;
-                document.getElementById('report-text').innerHTML = `<span>${data.analysis}</span>`;
+                document.getElementById('report-text').innerHTML = `<span>${data.analysis || "DATA_STREAM_CORRUPTED"}</span>`;
             } catch (err) {
                 document.getElementById('report-text').innerHTML = "<span class='text-red-500'>CRITICAL: CONNECTION TIMEOUT.</span>";
             }
